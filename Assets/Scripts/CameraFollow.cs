@@ -1,10 +1,10 @@
 using UnityEngine;
 
-// Câmera de cima, levemente inclinada, seguindo a galinha com suavização.
+// Câmera de cima, levemente inclinada, seguindo o aluno com suavização.
 public class CameraFollow : MonoBehaviour
 {
     [SerializeField] Transform target;
-    [SerializeField] Vector3 offset = new Vector3(2f, 10f, -6f);
+    [SerializeField] Vector3 offset = new Vector3(0f, 10f, -6f);
     [SerializeField] float smooth = 5f;
 
     void Start()

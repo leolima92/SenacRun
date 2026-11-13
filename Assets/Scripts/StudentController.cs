@@ -44,6 +44,7 @@ public class StudentController : MonoBehaviour
         if (target.x < minX || target.x > maxX)
         {
             Debug.Log($"[Aluno] Bloqueado: limite lateral da pista (x={target.x}, limite {minX}..{maxX})");
+            StartCoroutine(Bump(dir));
             return;
         }
         if (target.z < 0) return; // não volta pra trás do ponto de partida
@@ -56,6 +57,7 @@ public class StudentController : MonoBehaviour
             Debug.Log($"[Aluno] Bloqueado em ({target.x}, {target.z}) por '{h.name}' " +
                       $"(pai: '{(h.transform.parent ? h.transform.parent.name : "-")}', " +
                       $"layer: {LayerMask.LayerToName(h.gameObject.layer)})", h);
+            StartCoroutine(Bump(dir));
             return;
         }
 
@@ -81,6 +83,22 @@ public class StudentController : MonoBehaviour
 
         int row = Mathf.RoundToInt(target.z);
         if (row > MaxRow) MaxRow = row;
+    }
+
+    // "trombadinha": vai um pouco na direção e volta, pra mostrar que está bloqueado
+    IEnumerator Bump(Vector3 dir)
+    {
+        isHopping = true;
+        Vector3 start = transform.position;
+        float t = 0f;
+        while (t < 1f)
+        {
+            t = Mathf.Clamp01(t + Time.deltaTime / 0.15f);
+            transform.position = start + dir * (Mathf.Sin(t * Mathf.PI) * 0.2f);
+            yield return null;
+        }
+        transform.position = start;
+        isHopping = false;
     }
 
     void OnTriggerEnter(Collider other)

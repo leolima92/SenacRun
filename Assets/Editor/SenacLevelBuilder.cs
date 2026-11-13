@@ -285,6 +285,7 @@ public static class SenacLevelBuilder
         for (int z = goalZ + 1; z <= goalZ + 9; z++) Tile(ground, z, mPraca);
 
         BuildLandmarks(props, goalZ);
+        BuildPlayBounds(ground, goalZ);
 
         var goal = new GameObject("Chegada_Senac");
         goal.tag = "Goal";
@@ -931,6 +932,7 @@ public static class SenacLevelBuilder
 
         var so = new SerializedObject(follow);
         so.FindProperty("target").objectReferenceValue = target;
+        so.FindProperty("offset").vector3Value = V(0f, 10f, -6f);   // câmera centralizada
         so.ApplyModifiedPropertiesWithoutUndo();
 
         Vector3 offset = so.FindProperty("offset").vector3Value;
@@ -1000,6 +1002,18 @@ public static class SenacLevelBuilder
     {
         for (float x = -14f; x <= 14f; x += 2f)
             Box(p, V(x, 0.01f, z), V(1f, 0.02f, 0.08f), m);
+    }
+
+    // Faixa zebrada amarela/preta marcando o limite lateral da área jogável (x = -4..4)
+    static void BuildPlayBounds(Transform g, int goalZ)
+    {
+        var b = Child(g, "Limite_Area_Jogavel");
+        foreach (float x in new[] { -4.55f, 4.55f })
+            for (int z = -4; z <= goalZ; z++)
+            {
+                Box(b, V(x, 0.025f, z - 0.25f), V(0.12f, 0.03f, 0.5f), mFaixaAmarela);
+                Box(b, V(x, 0.025f, z + 0.25f), V(0.12f, 0.03f, 0.5f), mPreto);
+            }
     }
 
     static void SolidLine(Transform p, float z, Material m) =>
