@@ -11,8 +11,8 @@ public class StudentController : MonoBehaviour
 
     [Header("Limites e obstáculos")]
     [SerializeField] LayerMask obstacleMask;   // layer de árvores, postes, bancos
-    [SerializeField] float minX = -4f;
-    [SerializeField] float maxX = 4f;
+    [SerializeField] float minX = -11f;
+    [SerializeField] float maxX = 11f;
 
     bool isHopping;
     public bool IsDead { get; private set; }

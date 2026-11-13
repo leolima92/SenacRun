@@ -16,6 +16,7 @@ public static class SenacLevelBuilder
     const string MatDir = Root + "/Materials";
     const string PrefabDir = Root + "/Prefabs";
     const float HalfWidth = 15f;
+    const float PlayLimit = 11f;   // o aluno anda de -11 a 11 (carros nascem em ±12)
     const float LeftYaw = -90f;   // construção do lado esquerdo, fachada virada pra pista
     const float RightYaw = 90f;   // construção do lado direito
 
@@ -434,6 +435,8 @@ public static class SenacLevelBuilder
         var ctrl = root.AddComponent<StudentController>();
         var so = new SerializedObject(ctrl);
         so.FindProperty("obstacleMask").intValue = 1 << obstacleLayer;
+        so.FindProperty("minX").floatValue = -PlayLimit;
+        so.FindProperty("maxX").floatValue = PlayLimit;
         so.ApplyModifiedPropertiesWithoutUndo();
 
         foreach (float s in new[] { -1f, 1f })
@@ -679,9 +682,21 @@ public static class SenacLevelBuilder
         return t;
     }
 
+    // Colisor invisível que impede o aluno de atravessar uma construção
+    static void Solid(Transform t, Vector3 center, Vector3 size)
+    {
+        var go = new GameObject("Colisor");
+        go.layer = obstacleLayer;
+        go.transform.SetParent(t, false);
+        var c = go.AddComponent<BoxCollider>();
+        c.center = center;
+        c.size = size;
+    }
+
     static void BuildEstacao(Transform p, Vector3 pos, float yaw)
     {
         var t = Landmark(p, "Estacao_Jurubatuba", pos, yaw);
+        Solid(t, V(0, 2.25f, 2.5f), V(5f, 4.5f, 5f));
 
         Box(t, V(0, 2.25f, 2.5f), V(5f, 4.5f, 5f), mBege);
         Box(t, V(0, 4.6f, 2.5f), V(5.2f, 0.2f, 5.2f), mConcreto);
@@ -721,6 +736,7 @@ public static class SenacLevelBuilder
     static void BuildTapume(Transform p, float x, float z, float length)
     {
         var t = Child(p, "Obra_Tapume");
+        Solid(t, V(x, 1.1f, z), V(0.3f, 2.2f, length));
         Box(t, V(x, 1.1f, z), V(0.12f, 2.2f, length), mTapume);
         foreach (float px in new[] { x - 1.5f, x - 5.5f })
             foreach (float pz in new[] { z - 1f, z + 1f })
@@ -731,6 +747,7 @@ public static class SenacLevelBuilder
     static void BuildLanchonete(Transform p, Vector3 pos, float yaw)
     {
         var t = Landmark(p, "Lanchonete", pos, yaw);
+        Solid(t, V(0, 1.6f, 2f), V(3f, 3.2f, 4f));
         Box(t, V(0, 1.6f, 2f), V(3f, 3.2f, 4f), mParedeClara);
         Box(t, V(0, 3.0f, 1.95f), V(3.1f, 0.5f, 4.1f), mVermelho);
         Box(t, V(0, 1.2f, -0.03f), V(2.2f, 1.5f, 0.06f), mVidro);
@@ -746,6 +763,7 @@ public static class SenacLevelBuilder
     static void BuildPosto(Transform p, Vector3 pos, float yaw)
     {
         var t = Landmark(p, "Posto", pos, yaw);
+        Solid(t, V(0, 1.4f, 5.5f), V(3f, 2.8f, 2f));     // loja de conveniência
 
         Box(t, V(0, 3.2f, 2f), V(3f, 0.35f, 4.5f), mBranco);             // cobertura
         Box(t, V(0, 3.05f, 2f), V(3.05f, 0.12f, 4.55f), mVerdePosto);
@@ -779,6 +797,7 @@ public static class SenacLevelBuilder
     static void BuildMercado(Transform p, Vector3 pos, float yaw)
     {
         var t = Landmark(p, "Mercado", pos, yaw);
+        Solid(t, V(0, 2.6f, 4f), V(5f, 5.2f, 8f));
         Box(t, V(0, 2.6f, 4f), V(5f, 5.2f, 8f), mAmareloMercado);
         Box(t, V(0, 5.25f, 4f), V(5.1f, 0.1f, 8.1f), mCinzaClaro);
         Box(t, V(0, 4.4f, -0.04f), V(5f, 0.9f, 0.08f), mAzulMercado);
@@ -1008,7 +1027,7 @@ public static class SenacLevelBuilder
     static void BuildPlayBounds(Transform g, int goalZ)
     {
         var b = Child(g, "Limite_Area_Jogavel");
-        foreach (float x in new[] { -4.55f, 4.55f })
+        foreach (float x in new[] { -PlayLimit - 0.55f, PlayLimit + 0.55f })
             for (int z = -4; z <= goalZ; z++)
             {
                 Box(b, V(x, 0.025f, z - 0.25f), V(0.12f, 0.03f, 0.5f), mFaixaAmarela);
